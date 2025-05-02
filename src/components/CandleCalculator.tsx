@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -6,78 +7,61 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Droplet, Scale, Palette, CirclePercent } from 'lucide-react';
+import { Droplet, Scale, Palette, CirclePercent, Calculator } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/components/ui/use-toast';
-
-// Constants for calculations
-const DENSITY_RATIO = {
-  soy: 0.9, // Soy wax is less dense than water
-  paraffin: 0.85, // Paraffin is less dense than water
-};
+import { useToast } from '@/hooks/use-toast';
 
 const CandleCalculator: React.FC = () => {
   const { toast } = useToast();
-  const [waterWeight, setWaterWeight] = useState<string>('');
-  const [waxType, setWaxType] = useState<'soy' | 'paraffin'>('soy');
+  const [totalWeight, setTotalWeight] = useState<string>('');
   const [fragrancePercentage, setFragrancePercentage] = useState<number>(6); // Default 6%
+  const [soyPercentage, setSoyPercentage] = useState<number>(100); // Default 100% soy
   const [colorantGramsPerKg, setColorantGramsPerKg] = useState<number>(2); // Default 2g per kg
   
-  const [waxWeight, setWaxWeight] = useState<number>(0);
+  const [soyCandleWeight, setSoyCandleWeight] = useState<number>(0);
+  const [paraffinCandleWeight, setParaffinCandleWeight] = useState<number>(0);
   const [fragranceWeight, setFragranceWeight] = useState<number>(0);
   const [colorantWeight, setColorantWeight] = useState<number>(0);
   const [calculated, setCalculated] = useState<boolean>(false);
   
-  // Calculate wax weight based on water weight and wax type
-  const calculateWaxWeight = () => {
-    const waterWeightNum = parseFloat(waterWeight);
-    if (!isNaN(waterWeightNum) && waterWeightNum > 0) {
-      const calculatedWaxWeight = waterWeightNum / DENSITY_RATIO[waxType];
-      return Number(calculatedWaxWeight.toFixed(1));
-    }
-    return 0;
-  };
-  
-  // Calculate fragrance and colorant weights
-  const calculateAdditives = (wax: number) => {
-    if (wax > 0) {
-      const calculatedFragranceWeight = (wax * fragrancePercentage) / 100;
-      const calculatedColorantWeight = (wax * colorantGramsPerKg) / 1000;
-      
-      return {
-        fragrance: Number(calculatedFragranceWeight.toFixed(1)),
-        colorant: Number(calculatedColorantWeight.toFixed(2))
-      };
-    }
-    return { fragrance: 0, colorant: 0 };
-  };
-
   const handleReset = () => {
-    setWaterWeight('');
-    setWaxType('soy');
+    setTotalWeight('');
+    setSoyPercentage(100);
     setFragrancePercentage(6);
     setColorantGramsPerKg(2);
     setCalculated(false);
   };
 
   const handleCalculate = () => {
-    if (parseFloat(waterWeight) <= 0 || isNaN(parseFloat(waterWeight))) {
+    const totalWeightValue = parseFloat(totalWeight);
+    if (totalWeightValue <= 0 || isNaN(totalWeightValue)) {
       toast({
         title: "Inserisci un peso valido",
-        description: "Il peso dell'acqua deve essere maggiore di zero.",
+        description: "Il peso totale della candela deve essere maggiore di zero.",
         variant: "destructive",
       });
       return;
     }
     
-    // Perform calculations
-    const newWaxWeight = calculateWaxWeight();
-    const additives = calculateAdditives(newWaxWeight);
+    // Convertire le percentuali in decimali
+    const fragranceDecimal = fragrancePercentage / 100;
+    const soyDecimal = soyPercentage / 100;
+    const paraffinDecimal = 1 - soyDecimal; // La somma deve essere 100%
     
-    // Update state with calculated values
-    setWaxWeight(newWaxWeight);
-    setFragranceWeight(additives.fragrance);
-    setColorantWeight(additives.colorant);
+    // Calcolo secondo la formula fornita
+    const fragranceWeightValue = totalWeightValue * fragranceDecimal;
+    const totalWaxWeight = totalWeightValue - fragranceWeightValue;
+    const soyWaxWeight = totalWaxWeight * soyDecimal;
+    const paraffinWaxWeight = totalWaxWeight * paraffinDecimal;
+    
+    // Calcolo del colorante (in base al peso totale della cera)
+    const colorantWeightValue = (totalWaxWeight * colorantGramsPerKg) / 1000;
+    
+    // Aggiorno lo stato con i valori calcolati
+    setFragranceWeight(Number(fragranceWeightValue.toFixed(1)));
+    setSoyCandleWeight(Number(soyWaxWeight.toFixed(1)));
+    setParaffinCandleWeight(Number(paraffinWaxWeight.toFixed(1)));
+    setColorantWeight(Number(colorantWeightValue.toFixed(2)));
     setCalculated(true);
     
     toast({
@@ -98,7 +82,7 @@ const CandleCalculator: React.FC = () => {
           <Tabs defaultValue="measurement" className="w-full">
             <TabsList className="grid grid-cols-4 mb-6">
               <TabsTrigger value="measurement" className="flex gap-2 items-center">
-                <Droplet size={18} /> Misura
+                <Calculator size={18} /> Peso Totale
               </TabsTrigger>
               <TabsTrigger value="wax" className="flex gap-2 items-center">
                 <Scale size={18} /> Cera
@@ -114,50 +98,45 @@ const CandleCalculator: React.FC = () => {
             <TabsContent value="measurement" className="space-y-4">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="waterWeight">Peso dell'acqua (g)</Label>
+                  <Label htmlFor="totalWeight">Peso Totale della Candela (g)</Label>
                   <Input 
-                    id="waterWeight"
+                    id="totalWeight"
                     type="number"
-                    placeholder="Inserisci il peso dell'acqua in grammi"
-                    value={waterWeight}
-                    onChange={(e) => setWaterWeight(e.target.value)}
+                    placeholder="Inserisci il peso totale desiderato della candela in grammi"
+                    value={totalWeight}
+                    onChange={(e) => setTotalWeight(e.target.value)}
                     className="text-lg"
                   />
                   <p className="text-sm text-muted-foreground">
-                    Riempi il contenitore con acqua e pesalo in grammi per ottenere la capacità.
+                    Inserisci il peso totale desiderato della candela finita (inclusa cera, fragranza e colorante).
                   </p>
                 </div>
               </div>
             </TabsContent>
             
             <TabsContent value="wax" className="space-y-4">
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div
-                    className={cn(
-                      "border rounded-md p-4 cursor-pointer transition-all",
-                      waxType === "soy" 
-                        ? "border-primary bg-primary/10 shadow-md" 
-                        : "border-border hover:border-primary/50"
-                    )}
-                    onClick={() => setWaxType("soy")}
-                  >
-                    <h3 className="font-medium mb-2">Cera di Soia</h3>
-                    <p className="text-sm text-muted-foreground">Naturale, brucia più lentamente</p>
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <Label htmlFor="soyPercentage">Percentuale di Cera di Soia</Label>
+                    <span className="font-medium">{soyPercentage}%</span>
                   </div>
-                  
-                  <div
-                    className={cn(
-                      "border rounded-md p-4 cursor-pointer transition-all",
-                      waxType === "paraffin" 
-                        ? "border-primary bg-primary/10 shadow-md" 
-                        : "border-border hover:border-primary/50"
-                    )}
-                    onClick={() => setWaxType("paraffin")}
-                  >
-                    <h3 className="font-medium mb-2">Paraffina</h3>
-                    <p className="text-sm text-muted-foreground">Tradizionale, più economica</p>
+                  <Slider 
+                    id="soyPercentage"
+                    min={0} 
+                    max={100} 
+                    step={5}
+                    value={[soyPercentage]} 
+                    onValueChange={(values) => setSoyPercentage(values[0])}
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>0% (Solo Paraffina)</span>
+                    <span>Miscela 50/50</span>
+                    <span>100% (Solo Soia)</span>
                   </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    La percentuale di paraffina sarà automaticamente {100 - soyPercentage}% per garantire che la somma sia 100%.
+                  </p>
                 </div>
               </div>
             </TabsContent>
@@ -221,10 +200,15 @@ const CandleCalculator: React.FC = () => {
           <div className="space-y-6">
             <h3 className="text-xl font-serif text-center">Ricetta Finale</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-secondary/50 rounded-lg p-4 text-center">
-                <h4 className="text-sm font-medium text-muted-foreground mb-1">Cera {waxType === 'soy' ? 'di Soia' : 'Paraffina'}</h4>
-                <p className="text-2xl font-semibold">{waxWeight} g</p>
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Cera di Soia ({soyPercentage}%)</h4>
+                <p className="text-2xl font-semibold">{soyCandleWeight} g</p>
+              </div>
+              
+              <div className="bg-secondary/50 rounded-lg p-4 text-center">
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Paraffina ({100 - soyPercentage}%)</h4>
+                <p className="text-2xl font-semibold">{paraffinCandleWeight} g</p>
               </div>
               
               <div className="bg-secondary/50 rounded-lg p-4 text-center">
@@ -242,6 +226,7 @@ const CandleCalculator: React.FC = () => {
               <h4 className="font-medium mb-2">Note:</h4>
               <ul className="list-disc pl-5 space-y-1 text-sm">
                 <li>Sciogliere la cera a fuoco basso fino a 70-80°C</li>
+                <li>Se si utilizza una miscela di cere, mescolare bene durante la fusione</li>
                 <li>Aggiungere il colorante e mescolare bene</li>
                 <li>Lasciare raffreddare fino a 60-65°C</li>
                 <li>Aggiungere la fragranza e mescolare per 2 minuti</li>
