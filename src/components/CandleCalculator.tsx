@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -7,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Droplet, Scale, Palette, CirclePercent, Calculator } from 'lucide-react';
+import { Droplet, Scale, Palette, CirclePercent, Calculator, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
@@ -29,7 +28,16 @@ const CandleCalculator: React.FC = () => {
     setSoyPercentage(100);
     setFragrancePercentage(6);
     setColorantGramsPerKg(2);
+    setSoyCandleWeight(0);
+    setParaffinCandleWeight(0);
+    setFragranceWeight(0);
+    setColorantWeight(0);
     setCalculated(false);
+    
+    toast({
+      title: "Reset completato",
+      description: "Tutti i valori sono stati reimpostati.",
+    });
   };
 
   const handleCalculate = () => {
@@ -191,7 +199,14 @@ const CandleCalculator: React.FC = () => {
           </Tabs>
           
           <div className="flex gap-4 justify-center mt-8 mb-4">
-            <Button variant="outline" onClick={handleReset}>Reset</Button>
+            <Button 
+              variant="outline" 
+              onClick={handleReset}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw size={18} />
+              Reset
+            </Button>
             <Button onClick={handleCalculate}>Calcola</Button>
           </div>
           
