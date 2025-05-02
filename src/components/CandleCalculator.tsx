@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -27,41 +26,42 @@ const CandleCalculator: React.FC = () => {
   const [waxWeight, setWaxWeight] = useState<number>(0);
   const [fragranceWeight, setFragranceWeight] = useState<number>(0);
   const [colorantWeight, setColorantWeight] = useState<number>(0);
+  const [calculated, setCalculated] = useState<boolean>(false);
   
   // Calculate wax weight based on water weight and wax type
-  useEffect(() => {
+  const calculateWaxWeight = () => {
     const waterWeightNum = parseFloat(waterWeight);
     if (!isNaN(waterWeightNum) && waterWeightNum > 0) {
       const calculatedWaxWeight = waterWeightNum / DENSITY_RATIO[waxType];
-      setWaxWeight(Number(calculatedWaxWeight.toFixed(1)));
-    } else {
-      setWaxWeight(0);
+      return Number(calculatedWaxWeight.toFixed(1));
     }
-  }, [waterWeight, waxType]);
+    return 0;
+  };
   
   // Calculate fragrance and colorant weights
-  useEffect(() => {
-    if (waxWeight > 0) {
-      const calculatedFragranceWeight = (waxWeight * fragrancePercentage) / 100;
-      setFragranceWeight(Number(calculatedFragranceWeight.toFixed(1)));
+  const calculateAdditives = (wax: number) => {
+    if (wax > 0) {
+      const calculatedFragranceWeight = (wax * fragrancePercentage) / 100;
+      const calculatedColorantWeight = (wax * colorantGramsPerKg) / 1000;
       
-      const calculatedColorantWeight = (waxWeight * colorantGramsPerKg) / 1000;
-      setColorantWeight(Number(calculatedColorantWeight.toFixed(2)));
-    } else {
-      setFragranceWeight(0);
-      setColorantWeight(0);
+      return {
+        fragrance: Number(calculatedFragranceWeight.toFixed(1)),
+        colorant: Number(calculatedColorantWeight.toFixed(2))
+      };
     }
-  }, [waxWeight, fragrancePercentage, colorantGramsPerKg]);
+    return { fragrance: 0, colorant: 0 };
+  };
 
   const handleReset = () => {
     setWaterWeight('');
     setWaxType('soy');
     setFragrancePercentage(6);
     setColorantGramsPerKg(2);
+    setCalculated(false);
   };
 
   const handleCalculate = () => {
-    if (parseFloat(waterWeight) <= 0) {
+    if (parseFloat(waterWeight) <= 0 || isNaN(parseFloat(waterWeight))) {
       toast({
         title: "Inserisci un peso valido",
         description: "Il peso dell'acqua deve essere maggiore di zero.",
@@ -69,6 +69,16 @@ const CandleCalculator: React.FC = () => {
       });
       return;
     }
+    
+    // Perform calculations
+    const newWaxWeight = calculateWaxWeight();
+    const additives = calculateAdditives(newWaxWeight);
+    
+    // Update state with calculated values
+    setWaxWeight(newWaxWeight);
+    setFragranceWeight(additives.fragrance);
+    setColorantWeight(additives.colorant);
+    setCalculated(true);
     
     toast({
       title: "Calcolo completato",
