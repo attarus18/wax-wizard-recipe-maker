@@ -7,7 +7,7 @@ const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4">
         <p>©{new Date().getFullYear()} Wax Wizard | Calcolatore per Candele</p>
         <p className="mt-2">
-          Creato con 💛 per gli appassionati di candele
+          Creato con 💛 da LAB18 Design Studio per gli appassionati di candele
         </p>
       </div>
     </footer>
