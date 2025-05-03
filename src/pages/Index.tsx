@@ -6,7 +6,7 @@ import Footer from '@/components/Footer';
 
 const Index: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-candle-cream to-background">
+    <div className="min-h-screen bg-white">
       <div className="container px-4 py-8">
         <Header />
         

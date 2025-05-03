@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -80,25 +81,25 @@ const CandleCalculator: React.FC = () => {
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      <Card className="border border-candle-amber/20 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-candle-cream to-candle-light border-b border-candle-amber/20">
+      <Card className="border border-candle-amber/20 shadow-lg bg-white">
+        <CardHeader className="bg-white border-b border-candle-amber/20">
           <CardTitle className="text-3xl text-candle-dark text-center">Wax Wizard</CardTitle>
           <CardDescription className="text-center">Calcolatore di Ricette per Candele</CardDescription>
         </CardHeader>
         
-        <CardContent className="pt-6">
+        <CardContent className="pt-6 bg-white">
           <Tabs defaultValue="measurement" className="w-full">
             <TabsList className="grid grid-cols-4 mb-6">
-              <TabsTrigger value="measurement" className="flex gap-2 items-center">
+              <TabsTrigger value="measurement" className="flex gap-2 items-center text-candle-dark">
                 <Calculator size={18} /> Peso Totale
               </TabsTrigger>
-              <TabsTrigger value="wax" className="flex gap-2 items-center">
+              <TabsTrigger value="wax" className="flex gap-2 items-center text-candle-dark">
                 <Scale size={18} /> Cera
               </TabsTrigger>
-              <TabsTrigger value="fragrance" className="flex gap-2 items-center">
+              <TabsTrigger value="fragrance" className="flex gap-2 items-center text-candle-dark">
                 <CirclePercent size={18} /> Fragranza
               </TabsTrigger>
-              <TabsTrigger value="colorant" className="flex gap-2 items-center">
+              <TabsTrigger value="colorant" className="flex gap-2 items-center text-candle-dark">
                 <Palette size={18} /> Colore
               </TabsTrigger>
             </TabsList>
@@ -202,44 +203,49 @@ const CandleCalculator: React.FC = () => {
             <Button 
               variant="outline" 
               onClick={handleReset}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-candle-dark border-candle-amber/30 hover:bg-candle-amber/10"
             >
               <RefreshCw size={18} />
               Reset
             </Button>
-            <Button onClick={handleCalculate}>Calcola</Button>
+            <Button 
+              onClick={handleCalculate}
+              className="bg-candle-amber hover:bg-candle-amber/80 text-white"
+            >
+              Calcola
+            </Button>
           </div>
           
           <Separator className="my-8" />
           
           <div className="space-y-6">
-            <h3 className="text-xl font-serif text-center">Ricetta Finale</h3>
+            <h3 className="text-xl font-serif text-center text-candle-dark">Ricetta Finale</h3>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-secondary/50 rounded-lg p-4 text-center">
-                <h4 className="text-sm font-medium text-muted-foreground mb-1">Cera di Soia ({soyPercentage}%)</h4>
-                <p className="text-2xl font-semibold">{soyCandleWeight} g</p>
+              <div className="bg-white border border-candle-amber/20 rounded-lg p-4 text-center shadow-sm">
+                <h4 className="text-sm font-medium text-candle-dark mb-1">Cera di Soia ({soyPercentage}%)</h4>
+                <p className="text-2xl font-semibold text-candle-dark">{soyCandleWeight} g</p>
               </div>
               
-              <div className="bg-secondary/50 rounded-lg p-4 text-center">
-                <h4 className="text-sm font-medium text-muted-foreground mb-1">Paraffina ({100 - soyPercentage}%)</h4>
-                <p className="text-2xl font-semibold">{paraffinCandleWeight} g</p>
+              <div className="bg-white border border-candle-amber/20 rounded-lg p-4 text-center shadow-sm">
+                <h4 className="text-sm font-medium text-candle-dark mb-1">Paraffina ({100 - soyPercentage}%)</h4>
+                <p className="text-2xl font-semibold text-candle-dark">{paraffinCandleWeight} g</p>
               </div>
               
-              <div className="bg-secondary/50 rounded-lg p-4 text-center">
-                <h4 className="text-sm font-medium text-muted-foreground mb-1">Fragranza ({fragrancePercentage}%)</h4>
-                <p className="text-2xl font-semibold">{fragranceWeight} g</p>
+              <div className="bg-white border border-candle-amber/20 rounded-lg p-4 text-center shadow-sm">
+                <h4 className="text-sm font-medium text-candle-dark mb-1">Fragranza ({fragrancePercentage}%)</h4>
+                <p className="text-2xl font-semibold text-candle-dark">{fragranceWeight} g</p>
               </div>
               
-              <div className="bg-secondary/50 rounded-lg p-4 text-center">
-                <h4 className="text-sm font-medium text-muted-foreground mb-1">Colorante ({colorantGramsPerKg}g/kg)</h4>
-                <p className="text-2xl font-semibold">{colorantWeight} g</p>
+              <div className="bg-white border border-candle-amber/20 rounded-lg p-4 text-center shadow-sm">
+                <h4 className="text-sm font-medium text-candle-dark mb-1">Colorante ({colorantGramsPerKg}g/kg)</h4>
+                <p className="text-2xl font-semibold text-candle-dark">{colorantWeight} g</p>
               </div>
             </div>
             
-            <div className="bg-muted rounded-lg p-4 mt-4">
-              <h4 className="font-medium mb-2">Note:</h4>
-              <ul className="list-disc pl-5 space-y-1 text-sm">
+            <div className="bg-white border border-candle-amber/20 rounded-lg p-4 mt-4 shadow-sm">
+              <h4 className="font-medium mb-2 text-candle-dark">Note:</h4>
+              <ul className="list-disc pl-5 space-y-1 text-sm text-candle-dark">
                 <li>Sciogliere la cera a fuoco basso fino a 70-80°C</li>
                 <li>Se si utilizza una miscela di cere, mescolare bene durante la fusione</li>
                 <li>Aggiungere il colorante e mescolare bene</li>
